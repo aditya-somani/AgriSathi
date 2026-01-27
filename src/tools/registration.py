@@ -8,17 +8,9 @@ Handles saving farmer profile data to the SQLite database.
 import logging
 from livekit.agents import RunContext, function_tool
 from src.database import db
+from src.state import set_session_language, get_current_phone
 
 logger = logging.getLogger("agrisathi.tools.registration")
-
-# Global variable to track current caller's phone
-_current_phone: str = ""
-
-
-def set_current_phone(phone: str):
-    """Called by the entrypoint to set the current caller's phone number."""
-    global _current_phone
-    _current_phone = phone
 
 
 @function_tool()
@@ -41,9 +33,13 @@ async def register_farmer(
         crops: The main crops the farmer grows, comma-separated (e.g., wheat, rice).
         language: Preferred language - "hindi", "english", or "hinglish". Default is "hindi".
     """
-    global _current_phone
-    logger.info(f"Registering: {name}, {place}, {state}, {crops}, lang={language} for {_current_phone}")
-    db.register_farmer(_current_phone, name, place, state, crops, language)
+    current_phone = get_current_phone()
+    logger.info(f"Registering: {name}, {place}, {state}, {crops}, lang={language} for {current_phone}")
+    db.register_farmer(current_phone, name, place, state, crops, language)
+    
+    # Update session state clean import
+    set_session_language(language)
+    
     return f"Registration complete for {name} ji from {place}, {state}. I will remember your preference for {language}."
 
 
@@ -60,7 +56,11 @@ async def update_language_preference(
     Args:
         language: The new preferred language - "hindi", "english", or "hinglish" etc.
     """
-    global _current_phone
-    logger.info(f"Updating language to {language} for {_current_phone}")
-    db.update_language(_current_phone, language)
+    current_phone = get_current_phone()
+    logger.info(f"Updating language to {language} for {current_phone}")
+    db.update_language(current_phone, language)
+    
+    # Update session state clean import
+    set_session_language(language)
+    
     return f"Understood. I will now communicate in {language}."

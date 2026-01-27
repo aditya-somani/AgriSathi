@@ -21,7 +21,10 @@ class Config:
     CARTESIA_API_KEY = os.getenv("CARTESIA_API_KEY")  # For Cartesia TTS (backup)
     # GOOGLE_TTS_API_KEY = os.getenv("GOOGLE_TTS_API_KEY")  # For Google STT/TTS
     DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")  # For Deepgram STT/TTS
-
+    
+    # Logic Configuration
+    MAX_CALL_DURATION = 200  # 200 seconds 😮‍💨
+    
     @classmethod
     def validate(cls):
         """Ensure critical variables are set"""

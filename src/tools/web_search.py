@@ -6,7 +6,7 @@ from google import genai
 from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
 from livekit.agents import RunContext, function_tool
 from src.config import Config
-from src.tools.language_detection import get_session_language
+from src.state import get_session_language
 
 logger = logging.getLogger("agrisathi.tools.search")
 

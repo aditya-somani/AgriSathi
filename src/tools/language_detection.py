@@ -8,28 +8,9 @@ Helper tool to explicitly set and track the session language.
 import logging
 from livekit.agents import RunContext, function_tool
 from src.database import db
-import src.tools.registration as registration
+from src.state import set_session_language as set_state_lang, get_current_phone
 
 logger = logging.getLogger("agrisathi.tools.language")
-
-# Global variable to track current session language
-_session_language: str = "hindi"  # Default fallback
-
-
-def get_session_language() -> str:
-    """
-    Returns the current session language.
-    Used by other tools (like web_search) to format their responses.
-    """
-    return _session_language
-
-
-def set_session_language(language: str):
-    """
-    Manually set the session language (e.g., from profile loading).
-    """
-    global _session_language
-    _session_language = language
 
 
 @function_tool()
@@ -45,22 +26,22 @@ async def detect_language(
     Args:
         detected_language: The detected language (e.g., "hindi", "english", "bengali", "marathi").
     """
-    global _session_language
-    
     # Normalize language string
     lang_lower = detected_language.lower().strip()
     
-    # Update global state
-    _session_language = lang_lower
+    # Update global state via central manager
+    set_state_lang(lang_lower)
     
-    logger.info(f"Language detected/set to: {lang_lower} for phone {registration._current_phone}")
+    current_phone = get_current_phone()
+    logger.info(f"Language detected/set to: {lang_lower} for phone {current_phone}")
     
     # Also update the persistent database profile if we have a phone number
-    if registration._current_phone:
+    if current_phone:
         try:
-            db.update_language(registration._current_phone, lang_lower)
-            logger.debug(f"Updated persistent language preference for {registration._current_phone}")
+            db.update_language(current_phone, lang_lower)
+            logger.debug(f"Updated persistent language preference for {current_phone}")
         except Exception as e:
             logger.error(f"Failed to update language in DB: {e}")
             
     return f"Language set to {lang_lower}. I will now respond in {lang_lower}."
+
