@@ -176,6 +176,69 @@ Python is dynamic, meaning objects like `item` can change shape.
 Groq has its own SDK, so why use the OpenAI one?
 - **The Plumber's Logic**: Connecting an LLM to a Voice Room is hard. You have to manage audio buffers, handle "barge-ins" (interruptions), and sync text-to-speech. 
 - **The Abstraction**: The LiveKit `openai` plugin is already "pre-plumbed" into the LiveKit engine. By using it and simply pointing the `base_url` to Groq, we get all of Groq's speed with **Zero** extra manual plumbing code.
-- **The Lesson**: Always look for a "Managed Wrapper" before writing original integration code. It saves hundreds of lines of complex logic.
+---
+
+## 8. Masterclass: Forensic Event Intuition
+
+When documentation is sparse, we use **Forensic Deduction** to choose the right events.
+
+### The Forensic Triage
+We analyzed the available events in the LiveKit SDK by looking at their **Data Payloads**:
+
+1.  **`user_state_changed`**:
+    - **Payload**: `new_state: Literal["speaking", "listening"]`.
+    - **Deduction**: This is an acoustic signal. No text content.
+    - **Verdict**: Use for UI lights, not for logic.
+
+2.  **`user_input_transcribed`**:
+    - **Payload**: `transcript: str`, `is_final: bool`.
+    - **Deduction**: This is the "Draft" layer. It fires multiple times per sentence.
+    - **Risk**: Too unstable for business logic.
+
+3.  **`conversation_item_added`**:
+    - **Payload**: `item: ChatMessage`.
+    - **Deduction**: "Added" means the message is **Committed** to the context history (the brain).
+    - **Verdict**: **The Source of Truth**. Stable and finalized.
 
 ---
+
+## 9. Defensive Coding vs. SDK Native Properties
+
+In `src/handlers/conversation.py`, we discussed the trade-off between "Safety Code" and "Clean Code."
+
+### The "Defensive" approach
+Initially, we used `hasattr(item, 'text_content')` and manual loops to extract text. 
+- **Pros**: Backward compatible if the SDK version is downgraded.
+- **Cons**: Messy and redundant.
+
+### The "Clean" approach (Refactored)
+We switched to the SDK-native `item.text_content` property.
+- **Pros**: 80% less code, uses the SDK's built-in "stitching" logic.
+- **Decision**: In production, trust the SDK but keep dependencies updated.
+
+---
+
+## 10. The Hallucination Shield (Summary Handler)
+
+In `src/handlers/summary.py`, we implemented strict constraints to keep AI factual.
+
+### 🛡️ The Hard Guard
+- **Logic**: If a call has `< 2` messages, we skip the AI entirely and save a hardcoded string.
+- **Reasoning**: Saves costs and prevents the AI from "writing a story" for a 2-second call.
+
+### 🛡️ The Constraint Guard
+- **Prompt**: "Summarize in EXACTLY 10 words or less."
+- **Reasoning**: Humans trust AI more on deterministic tasks. By imposing strict limits, we get highly scannable, factual logs instead of long-winded AI padding.
+
+---
+
+## 11. Production-Grade Cleanup: The Shutdown Callback
+
+We use `ctx.add_shutdown_callback(cleanup)` in `agent.py` as our "Last Will and Testament."
+- **Why?** Calls end unpredictably. Whether the user hangs up or the server times out, this callback guarantees that the `save_session_summary` function runs one last time.
+- **Result**: Zero data loss. Every call results in a record.
+
+---
+
+*This concludes Part 3 of the AgriSathi Deep Dive. You now understand the code, the architectural patterns, and the forensic intuition required to build and maintain a professional AI agent.*
+

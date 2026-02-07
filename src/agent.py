@@ -7,6 +7,7 @@ Handles LiveKit lifecycle, STT/TTS pipeline, and session coordination.
 import logging
 import asyncio
 from livekit.agents import Agent, AgentSession, AutoSubscribe, JobContext
+from livekit.plugins import google
 from livekit.plugins import silero
 from livekit.plugins import openai as lk_openai
 from livekit.plugins.deepgram import STT as DeepgramSTT
@@ -61,11 +62,12 @@ async def entrypoint(ctx: JobContext):
     # 3. Session Setup
     session = AgentSession(
         stt=DeepgramSTT(model="nova-3", language='multi'),
-        llm=lk_openai.LLM(
-            model="openai/gpt-oss-20b",
-            api_key=Config.GROQ_API_KEY,
-            base_url="https://api.groq.com/openai/v1",
-        ),
+        # llm=lk_openai.LLM(
+        #     model="openai/gpt-oss-20b",
+        #     api_key=Config.GROQ_API_KEY,
+        #     base_url="https://api.groq.com/openai/v1",
+        # ),
+        llm=google.LLM(model="gemini-3"),
         tts=CartesiaTTS(model="sonic-3", voice="faf0731e-dfb9-4cfc-8119-259a79b27e12"),
         vad=silero.VAD.load(),
         turn_detection=MultilingualModel(),

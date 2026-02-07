@@ -103,6 +103,38 @@ class FarmerDB:
             conn.commit()
             logger.info(f"Language updated to {language} for {phone}")
 
+    def update_farmer_details(self, phone: str, name: str = None, place: str = None, state: str = None, crops: str = None):
+        """Updates specific fields of a farmer's profile"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Dynamic query building
+            updates = []
+            params = []
+            
+            if name:
+                updates.append("name = ?")
+                params.append(name)
+            if place:
+                updates.append("place = ?")
+                params.append(place)
+            if state:
+                updates.append("state = ?")
+                params.append(state)
+            if crops:
+                updates.append("crops = ?")
+                params.append(crops)
+                
+            if not updates:
+                return # Nothing to update
+                
+            params.append(phone)
+            query = f"UPDATE farmers SET {', '.join(updates)} WHERE phone = ?"
+            
+            cursor.execute(query, tuple(params))
+            conn.commit()
+            logger.info(f"Updated profile for {phone}: {updates}")
+
     def add_summary(self, phone: str, summary: str):
         """
         Records a new conversation summary.

@@ -27,12 +27,16 @@ class Config:
     
     @classmethod
     def validate(cls):
-        """Ensure critical variables are set"""
+        """Ensure critical variables are set.
+        
+        Note: LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET are NOT validated here
+        because LiveKit Cloud injects them automatically at runtime.
+        """
         missing = []
-        if not cls.LIVEKIT_URL: missing.append("LIVEKIT_URL")
-        if not cls.LIVEKIT_API_KEY: missing.append("LIVEKIT_API_KEY")
-        if not cls.LIVEKIT_API_SECRET: missing.append("LIVEKIT_API_SECRET")
-        if not cls.GOOGLE_API_KEY: missing.append("GOOGLE_API_KEY")
+        # if not cls.LIVEKIT_URL: missing.append("LIVEKIT_URL")
+        # if not cls.LIVEKIT_API_KEY: missing.append("LIVEKIT_API_KEY")
+        # if not cls.LIVEKIT_API_SECRET: missing.append("LIVEKIT_API_SECRET")
+        # if not cls.GOOGLE_API_KEY: missing.append("GOOGLE_API_KEY")
         if not cls.WEB_API_KEY: missing.append("WEB_API_KEY")
         if not cls.CARTESIA_API_KEY: missing.append("CARTESIA_API_KEY")
         if not cls.DEEPGRAM_API_KEY: missing.append("DEEPGRAM_API_KEY")

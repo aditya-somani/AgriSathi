@@ -59,3 +59,15 @@
 ---
 
 *Add new decisions as they are made*
+
+---
+
+## Decision 6: Profile Update Logic
+**Date**: 2026-01-28 | **Status**: ✅ Implemented
+
+**Choice**: Partial update query in SQLite (dynamic query building)
+
+**Alternatives Considered**:
+- `INSERT OR REPLACE` - required fetching all data first or asking user for everything again.
+
+**Rationale**: Allows users to update just one field (e.g., "Change my crop to Wheat") seamlessly without re-confirming name/location.

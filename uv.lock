@@ -1778,7 +1778,7 @@ wheels = [
 [[package]]
 name = "project-agrisathi"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "dotenv" },
     { name = "livekit-agents", extra = ["assemblyai", "cartesia", "deepgram", "google", "silero", "turn-detector"] },
@@ -1793,6 +1793,9 @@ requires-dist = [
     { name = "livekit-plugins-openai", specifier = ">=1.3.12" },
     { name = "livekit-plugins-turn-detector", specifier = ">=1.3.12" },
 ]
+
+[package.metadata.requires-dev]
+dev = []
 
 [[package]]
 name = "prometheus-client"

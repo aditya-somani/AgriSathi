@@ -1,7 +1,7 @@
 [project]
 name = "project-agrisathi"
 version = "0.1.0"
-description = "Add your description here"
+description = "AgriSathi - AI Voice Assistant for Indian Farmers"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -10,3 +10,15 @@ dependencies = [
     "livekit-plugins-openai>=1.3.12",
     "livekit-plugins-turn-detector>=1.3.12",
 ]
+
+# Make the 'src' directory a proper Python package
+[tool.setuptools.packages.find]
+where = ["."]
+
+# Tell uv to install this package in editable mode
+[tool.uv]
+dev-dependencies = []
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

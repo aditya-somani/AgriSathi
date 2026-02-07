@@ -64,3 +64,28 @@ async def update_language_preference(
     set_session_language(language)
     
     return f"Understood. I will now communicate in {language}."
+
+@function_tool()
+async def update_farmer_profile(
+    context: RunContext,
+    name: str = None,
+    place: str = None,
+    state: str = None,
+    crops: str = None,
+):
+    """
+    Updates specific details in the farmer's profile (Name, Location, Crops).
+    Call this when the user wants to correct or update their information.
+    Do NOT call this for language changes (use update_language_preference instead).
+    
+    Args:
+        name: New name (if changed).
+        place: New village/city (if changed).
+        state: New state (if changed).
+        crops: New crops list (if changed).
+    """
+    current_phone = get_current_phone()
+    logger.info(f"Updating profile for {current_phone}: name={name}, place={place}, state={state}, crops={crops}")
+    db.update_farmer_details(current_phone, name=name, place=place, state=state, crops=crops)
+    
+    return "Profile details updated successfully."
