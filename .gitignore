@@ -9,11 +9,14 @@ wheels/
 # Virtual environments
 .venv
 
-# Agent
-# .agent
+# Agent (local AI dev memory, not for the repo)
+.agent/
 
 # Environment 
 .env
 
 # Data
-data
+data/
+
+# Local AI development guidelines
+GEMINI.md
