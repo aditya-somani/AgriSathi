@@ -8,7 +8,6 @@ Helper tool to explicitly set and track the session language.
 import logging
 from livekit.agents import RunContext, function_tool
 from src.database import db
-from src.state import set_session_language as set_state_lang, get_current_phone
 
 logger = logging.getLogger("agrisathi.tools.language")
 
@@ -28,13 +27,13 @@ async def detect_language(
     """
     # Normalize language string
     lang_lower = detected_language.lower().strip()
-    
-    # Update global state via central manager
-    set_state_lang(lang_lower)
-    
-    current_phone = get_current_phone()
+
+    current_phone = context.session.userdata["phone"]
     logger.info(f"Language detected/set to: {lang_lower} for phone {current_phone}")
-    
+
+    # Keep the session's language in sync for the rest of this call
+    context.session.userdata["language"] = lang_lower
+
     # Also update the persistent database profile if we have a phone number
     if current_phone:
         try:
@@ -42,6 +41,6 @@ async def detect_language(
             logger.debug(f"Updated persistent language preference for {current_phone}")
         except Exception as e:
             logger.error(f"Failed to update language in DB: {e}")
-            
+
     return f"Language set to {lang_lower}. I will now respond in {lang_lower}."
 

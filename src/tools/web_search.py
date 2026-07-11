@@ -6,7 +6,6 @@ from google import genai
 from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
 from livekit.agents import RunContext, function_tool
 from src.config import Config
-from src.state import get_session_language
 
 logger = logging.getLogger("agrisathi.tools.search")
 
@@ -58,7 +57,7 @@ async def web_search(
         
         # Enhanced query for agricultural context
         today = datetime.now().strftime("%d %B %Y")
-        user_lang = get_session_language()
+        user_lang = ctx.session.userdata.get("language", "english")
         
         system_instruction = f"""
 You are an expert agricultural interpreter for Indian farmers. 

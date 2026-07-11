@@ -17,7 +17,6 @@ from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from src.config import Config
 from src.database import db
 from src.tools import ALL_TOOLS
-from src.state import set_current_phone, set_session_language
 from src.prompt import SYSTEM_PROMPT
 
 # Modular Handlers
@@ -44,20 +43,19 @@ async def entrypoint(ctx: JobContext):
     # 1. Identity & Profile
     participant = await ctx.wait_for_participant()
     phone = participant.identity
-    set_current_phone(phone)
-    
+
     farmer_profile = db.get_farmer(phone)
-    
+
     # 2. Instruction Building
     custom_instructions = SYSTEM_PROMPT
+    session_language = "english"
     if farmer_profile:
         history = "\n- ".join(farmer_profile['history'][-5:]) if farmer_profile['history'] else "No history."
         lang = farmer_profile.get('preferred_language', 'English')
+        session_language = lang.lower() if lang else "english"
         custom_instructions += f"\n\n## User: {farmer_profile['name']}\n- Location: {farmer_profile['place']}\n- Past: {history}\n- Language: {lang}"
-        set_session_language(lang)
     else:
         custom_instructions += "\n\n## Status: New User. Greet in English/Neutral and detect language."
-        set_session_language("english")
 
     # 3. Session Setup
     session = AgentSession(
@@ -73,6 +71,11 @@ async def entrypoint(ctx: JobContext):
         turn_detection=MultilingualModel(),
         preemptive_generation=True,
     )
+
+    # Per-call state lives on the session object, NOT in a shared global.
+    # A single worker serves many calls, so a module-level variable would be
+    # overwritten by the next caller. userdata is isolated per session.
+    session.userdata = {"phone": phone, "language": session_language}
 
     # 4. Attach Modular Handlers
     conversation_log = []
