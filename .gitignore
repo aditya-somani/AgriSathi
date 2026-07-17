@@ -20,3 +20,6 @@ data/
 
 # Local AI development guidelines
 GEMINI.md
+
+# opencode config
+.opencode/
